@@ -54,45 +54,53 @@ M = 512;
 N = 512;
 I = imresize(I,[M,N]);
 
+% amplitude 
+A0 = sqrt(I); 
+
 % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - %
 % SHARPEN IMAGE
 % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - %
 
 % current image sharpness 
-S1 = sum(I(:).^2)
+S1 = I.*I;
+S1 = sum(sum(S1))
 
 % bin number 
 bin = 8;
 binM = M/bin;
 binN = N/bin;
 
-phaseArray = ones(M,N)*1.5;
+phaseArray = ones(M,N)*1.1;
 
 
-Ifft = fftshift(fft2(ifftshift(I)));
+% there is a potential normalization issue here
+Ifft = fftshift(fft2(ifftshift(A0)));
 
 Ifft = abs(Ifft).*exp(1i*angle(Ifft).*phaseArray);
 
-figure('color','w');
-subplot(121);
-imagesc(log(abs(Ifft)));
-axis off; axis image;
-colormap('gray');
+% figure('color','w');
+% subplot(121);
+% imagesc(log(abs(Ifft)));
+% axis off; axis image;
+% colormap('gray');
+% 
+% subplot(122);
+% imagesc(angle(Ifft));
+% axis off; axis image;
+% colormap('gray');
 
-subplot(122);
-imagesc(angle(Ifft));
-axis off; axis image;
-colormap('gray');
 
+A1 = ifftshift(ifft2(fftshift(Ifft)));
 
-J = abs(ifftshift(ifft2(fftshift(Ifft))));
+J = abs(A1.^2);
 
 % current image sharpness 
 S2 = J.*J;
-S2 = sum(S2(:))
-S2 = sum(J(:).^2)
+S2 = sum(sum(S2))
 
 S1/S2
+
+sum(I(:))/sum(J(:))
 
 isequal(cast(I,'uint8'), cast(J, 'uint8'))
 % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - %
