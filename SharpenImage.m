@@ -111,7 +111,7 @@ S1/S0
 
 % isequal(cast(I,'uint8'), cast(J, 'uint8'))
 % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - %
-% PLOTS 
+% ORIGINAL AND BLURRED PLOTS 
 % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - %
 
 % MAIN figure
@@ -131,6 +131,22 @@ imagesc(abs(J));
 axis off; axis image;
 title('blurred');
 
-linkaxes([ho,hs])
+linkaxes([ho,hs]);
+
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - %
+% LOOP TO IMPROVE SHARPNESS
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - %
+
+for ii = 1:M
+    for jj = 1:N
+        % blah
+      
+    end
+end
+
+
+
+
+
 end
 
