@@ -82,8 +82,12 @@ S0 = sum(sum(S0));
 % amplitude of original image
 a0 = sqrt(I); 
 
+% generate a quadratic phase
+maxPhase = pi;
+quadPhase = GenQuadraticPhase(I, maxPhase);
+
 % phase distortion to be added in the Fourier plane
-phaseArray = ones(M,N)*pi;
+phaseArray = quadPhase; 
 
 % Fourier transform
 A0 = fftshift(fft2(ifftshift(a0)))/sqrt(M*N);
@@ -101,9 +105,9 @@ J = abs(a1.^2);
 S1 = J.*J;
 S1 = sum(sum(S1));
 
-S0/S1
+S1/S0
 
-sum(I(:))/sum(J(:))
+% sum(I(:))/sum(J(:)) % sanity check, conservation of power
 
 % isequal(cast(I,'uint8'), cast(J, 'uint8'))
 % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - %
