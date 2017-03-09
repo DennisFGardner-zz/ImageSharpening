@@ -1,30 +1,33 @@
 function quadPhase = GenQuadraticPhase(A, maxPhase)
-%GENQUADRATICPHASE - apply phase array in Fourier plane to maximize sharpness
-%Optional file header info (to give more details about the function than in the H1 line)
-%Optional file header info (to give more details about the function than in the H1 line)
-%Optional file header info (to give more details about the function than in the H1 line)
+%GENQUADRATICPHASE - generate a quadratic phase array
+% An 2D quadratic function is generated. The number of rows and columns of
+% the array is given by the size of the input variable A. The maximum
+% absolute value of the quadratic function is given by the input variable
+% MAXPHASE. The concavity of the quadratic function is given by the sign of
+% MAXPHASE.
 %
-% Syntax:  [output1,output2] = function_name(input1,input2,input3)
+% Syntax:  [quadPhase] = GenQuadraticPhase(A, maxPhase);
 %
 % Inputs:
-%    A - input array to determine size of generated array
-%    input2 - Description
-%    input3 - Description
+%    A - input array to determine size of generated array 
+%    maxPhase - the abolute value maximum of the phase, the sign determines
+%               the concavity of the function input3 - Description
 %
 % Outputs:
-%    output1 - Description
-%    output2 - Description
+%    quadPhase - generated 2D quadratic phase array (unwrapped)
 %
 % Example: 
-%    Line 1 of example
-%    Line 2 of example
-%    Line 3 of example
+%    A = ones(64,64);
+%    quadPhase = GenQuadraticPhase(I, 4*pi);
+%    or
+%    A = ones(128,64);
+%    quadPhase = GenQuadraticPhase(I, -pi);
 %
 % Other m-files required: none
 % Subfunctions: none
 % MAT-files required: none
 %
-% See also: SHARPENIMAGE,  OTHER_FUNCTION_NAME2
+% See also: SHARPENIMAGE
 
 % Author: Dennis F. Gardner
 % Work address
@@ -32,31 +35,36 @@ function quadPhase = GenQuadraticPhase(A, maxPhase)
 % Website: http://www.dennisfgardner.com
 % March 2017; Last revision: 09-March-2017
 
+% use A to define the number of rows and cols
 [M,N] = size(A); 
 
+% generate a gird
 x = -N/2:1:N/2-1;
 y = -M/2:1:M/2-1;
-
 [X, Y] = meshgrid(x,y);
 
-
+% generat the quadratic function
 quadPhase = X.*X + Y.*Y;
 
+% normalize the function
 quadPhase = quadPhase./max(quadPhase(:));
 
+% apply the maximum value and concavity
 quadPhase = quadPhase.*maxPhase;
 
-figure('color','w');
-subplot(121);
-imagesc(quadPhase);
-axis image
-title('unwrapped')
-
-subplot(122);
-imagesc(angle(exp(1i*quadPhase)));
-axis image;
-title('wrapped');
-
+% % % % plot the results (optional) 
+% % % figure('color','w');
+% % % % wrapped
+% % % subplot(121);
+% % % imagesc(angle(exp(1i*quadPhase)));
+% % % axis image;
+% % % title('wrapped');
+% % % % unwrapped
+% % % subplot(122);
+% % % imagesc(quadPhase);
+% % % axis image
+% % % title('unwrapped')
+% % % 
 
 
 
