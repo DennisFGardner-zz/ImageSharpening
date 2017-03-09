@@ -68,19 +68,8 @@ if strcmp(imageName, 'comic-2026760_640.png')
 end
 
 % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - %
-% READ IN IMAGE, if the simely face, then covert to binary
-% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - %
-
-% the original sharpness of the image (this can be cleaned-up)
-S0 = I.*I;
-S0 = sum(sum(S0));
-
-% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - %
 % BLUR THE IMAGE
 % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - %
-
-% amplitude of original image
-a0 = sqrt(I); 
 
 % generate a quadratic phase
 maxPhase = pi;
@@ -89,27 +78,11 @@ quadPhase = GenQuadraticPhase(I, maxPhase);
 % phase distortion to be added in the Fourier plane
 phaseArray = quadPhase; 
 
-% Fourier transform
-A0 = fftshift(fft2(ifftshift(a0)))/sqrt(M*N);
+% apply the phase in the Fourier plane
+[sOrig, sPhase, J] = fft2andPhase(I, phaseArray);
 
-% apply distortion to the phase only
-A1 = abs(A0).*exp(1i*angle(A0)).*exp(1i*phaseArray);
+sPhase/sOrig
 
-% Fourier back to real space
-a1 = ifftshift(ifft2(fftshift(A1)))*sqrt(M*N);
-
-% Intensity of distorted image
-J = abs(a1.^2);
-
-% image sharpness of distorted image
-S1 = J.*J;
-S1 = sum(sum(S1));
-
-S1/S0
-
-% sum(I(:))/sum(J(:)) % sanity check, conservation of power
-
-% isequal(cast(I,'uint8'), cast(J, 'uint8'))
 % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - %
 % ORIGINAL AND BLURRED PLOTS 
 % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - %
@@ -119,7 +92,7 @@ Hmain = figure('color','w');
 
 % original image
 ho = subplot(121);
-imagesc(I);
+imagesc(abs(I));
 axis off; axis image;
 colormap('gray');
 title('original');
@@ -137,21 +110,38 @@ linkaxes([ho,hs]);
 % LOOP TO IMPROVE SHARPNESS
 % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - %
 
-phaseFix = zeros(M,N);
 
 
-for ii = 1:M
-    for jj = 1:N
+for ii = 1:2
+        phaseFixPlus = GenQuadraticPhase(J, maxPhase);
+        phaseFixNeg = GenQuadraticPhase(J, -maxPhase);
         
-        phaseFixPlus = phaseFix(ii,jj) + pi;
-        phaseFixNeg =  phaseFix(ii,jj) - pi;
+        [sBefore, sPlus, JPlus] = fft2andPhase(J, phaseFixPlus);
+        [sBefore, sNeg, JNeg] = fft2andPhase(J, phaseFixNeg);
         
-      
-    end
 end
 
+sPlus
+sNeg
 
+% Supporting figure
+Hsupp = figure('color','w');
 
+% original image
+hp = subplot(121);
+imagesc(abs(JPlus));
+axis off; axis image;
+colormap('gray');
+title('plus');
+
+% sharpened image
+figure(Hsupp)
+hn = subplot(122);
+imagesc(abs(JNeg));
+axis off; axis image;
+title('neg');
+
+linkaxes([hp,hn]);
 
 
 end
