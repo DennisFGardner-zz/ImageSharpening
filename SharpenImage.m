@@ -137,9 +137,15 @@ linkaxes([ho,hs]);
 % LOOP TO IMPROVE SHARPNESS
 % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - %
 
+phaseFix = zeros(M,N);
+
+
 for ii = 1:M
     for jj = 1:N
-        % blah
+        
+        phaseFixPlus = phaseFix(ii,jj) + pi;
+        phaseFixNeg =  phaseFix(ii,jj) - pi;
+        
       
     end
 end
