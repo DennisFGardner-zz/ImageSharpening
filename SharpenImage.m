@@ -34,11 +34,13 @@ function [I, J] = SharpenImage( )
 
 
 % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - %
-% READ IN IMAGE
+% READ IN IMAGE, if the simely face, then covert to binary
 % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - %
 
 % name of the image
-imageName = 'car-370695.jpg';
+% imageName = 'car-370695.jpg';
+% imageName = 'shrine-1696261_640.png';
+imageName = 'comic-2026760_640.png';
 
 % read in the image
 I = imread(imageName);
@@ -49,60 +51,61 @@ I = rgb2gray(I);
 % convert image to double
 I = double(I);
 
+
 % re-zsize the image
-M = 512;
-N = 512;
+M = 64;
+N = 64;
 I = imresize(I,[M,N]);
 
-% amplitude 
-A0 = sqrt(I); 
+% convert to a binary image
+if strcmp(imageName, 'comic-2026760_640.png')
+    
+    fprintf('converting to binary \n');
+    I = I-min(I(:));
+    I = I/max(I(:));
+    I = round(I); 
+    
+end
 
 % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - %
-% SHARPEN IMAGE
+% READ IN IMAGE, if the simely face, then covert to binary
 % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - %
 
-% current image sharpness 
-S1 = I.*I;
-S1 = sum(sum(S1))
+% the original sharpness of the image (this can be cleaned-up)
+S0 = I.*I;
+S0 = sum(sum(S0));
 
-% bin number 
-bin = 8;
-binM = M/bin;
-binN = N/bin;
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - %
+% BLUR THE IMAGE
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - %
 
-phaseArray = ones(M,N)*1.1;
+% amplitude of original image
+a0 = sqrt(I); 
 
+% phase distortion to be added in the Fourier plane
+phaseArray = ones(M,N)*pi;
 
-% there is a potential normalization issue here
-Ifft = fftshift(fft2(ifftshift(A0)));
+% Fourier transform
+A0 = fftshift(fft2(ifftshift(a0)))/sqrt(M*N);
 
-Ifft = abs(Ifft).*exp(1i*angle(Ifft).*phaseArray);
+% apply distortion to the phase only
+A1 = abs(A0).*exp(1i*angle(A0)).*exp(1i*phaseArray);
 
-% figure('color','w');
-% subplot(121);
-% imagesc(log(abs(Ifft)));
-% axis off; axis image;
-% colormap('gray');
-% 
-% subplot(122);
-% imagesc(angle(Ifft));
-% axis off; axis image;
-% colormap('gray');
+% Fourier back to real space
+a1 = ifftshift(ifft2(fftshift(A1)))*sqrt(M*N);
 
+% Intensity of distorted image
+J = abs(a1.^2);
 
-A1 = ifftshift(ifft2(fftshift(Ifft)));
+% image sharpness of distorted image
+S1 = J.*J;
+S1 = sum(sum(S1));
 
-J = abs(A1.^2);
-
-% current image sharpness 
-S2 = J.*J;
-S2 = sum(sum(S2))
-
-S1/S2
+S0/S1
 
 sum(I(:))/sum(J(:))
 
-isequal(cast(I,'uint8'), cast(J, 'uint8'))
+% isequal(cast(I,'uint8'), cast(J, 'uint8'))
 % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - %
 % PLOTS 
 % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - %
@@ -122,7 +125,7 @@ figure(Hmain)
 hs = subplot(122);
 imagesc(abs(J));
 axis off; axis image;
-title('shapened');
+title('blurred');
 
 linkaxes([ho,hs])
 end
